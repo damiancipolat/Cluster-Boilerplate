@@ -1,0 +1,24 @@
+{
+  "name": "cluster-boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "master.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damiancipolat/Cluster-Boilerplate.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/damiancipolat/Cluster-Boilerplate/issues"
+  },
+  "homepage": "https://github.com/damiancipolat/Cluster-Boilerplate#readme",
+  "dependencies": {
+    "commander": "^2.19.0",
+    "winston": "^3.2.1"
+  }
+}
