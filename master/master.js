@@ -158,8 +158,8 @@ const start = (workerNum,collector)=>{
 
     //Timeout to the childrens.
     setInterval(()=>{
-      //dispatchToWorker({code:'test',msg:'test hola'});
-    },2000);
+      dispatchToWorker({code:'test',msg:'test hola'});
+    },200);
 
   } catch(err){
     logger.error('Error creating workers', err);
