@@ -1,6 +1,11 @@
 # Cluster-Boilerplate
 This template was made thinking in a production environemnt, is a master / worker process, that you can use to make parallel processing.
 
+**Diagram:**
+
+The project architecture is the next..
+![N|Solid](https://github.com/damiancipolat/Cluster-Boilerplate/blob/master/doc/diagram.png?raw=true)
+
 **Configuration:**
 
 Go to /config/default.json and change the default parameters, feel free to adapt this file.
