@@ -16,8 +16,9 @@ Go to /config/default.json and change the default parameters, feel free to adapt
 ```
 
 **To run:**
+
+Use the parameter -w or --workers to set the number of worker process to use.
 ```sh
 $ npm install
 $ node server.js --w 4
 ```
-Use the parameter -w or --workers to set the number of worker process to use.
