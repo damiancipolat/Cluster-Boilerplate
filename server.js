@@ -7,33 +7,36 @@ const config  = require('config');
 const logger = require('./lib/logger.js');
 
 //Load master / worker modules.
-const worker  = require('./worker.js');
-const master  = require('./master.js');
+const worker  = require('./worker/worker.js');
+const master  = require('./master/master.js');
 
-//Define run commands fron console: node server.js --port P --workers N --collector
+/*
+  Define run commands from console:
+  node server.js --port P --workers N --collector
+*/
 program
   .version('1.0.0', '-v, --version')
   .usage('[OPTIONS]...')
-  .option('-c, --crocodile', 'Use crocodile instead of alligator')
-  .option('-n, --name <name>', 'Your name', 'human')
+  .option('-w, --workers <workers>', 'Number of workers to run', config.get('service.workers'))
   .parse(process.argv);
 
-const reptile = (program.crocodile ? 'Crocodiles' : 'Alligators');
+//Allow commander to parse `process.argv`
+program.parse(process.argv);
 
-console.log(
-  `${reptile} are the best! Don't you agree, ${program.name}?`
-);
+//Start cluster.
+try{
 
-// allow commander to parse `process.argv`
-program.parse(process.argv);	
+  //Get parameters from program.
+  const {
+    workers
+  } = program;
 
-//logger.info('message content', { "context": "index.js", "metric": 1 });
-/*
+  //Switch process flow.
+  if (cluster.isMaster)
+    master(workers);
+  else
+    worker();
 
-
-//Switch process flow.
-if (cluster.isMaster)
-  master();
-else
-  worker();
-*/
+} catch(err){
+  logger.error('Error in startup', err);
+}

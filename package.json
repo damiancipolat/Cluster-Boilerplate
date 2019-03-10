@@ -19,6 +19,8 @@
   "homepage": "https://github.com/damiancipolat/Cluster-Boilerplate#readme",
   "dependencies": {
     "commander": "^2.19.0",
+    "config": "^3.0.1",
+    "rr": "^0.1.0",
     "winston": "^3.2.1"
   }
 }

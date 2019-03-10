@@ -1,14 +1,8 @@
 {
-  "name": "cluster-boilerplate",
-  "version": "1.0.0",
-  "bd":{
-    "url":"",
-    "user":"ssss",
-    "port":"111"
+  "service":{
+    "name":"cluster-boiler",
+    "workers":3,
+    "dispatch":"round-robin"
   },
-  "workers":1,
-  "server":{
-    "port":8080,
-    "ip":"127.0.0.1"
-  }
+  "log":"log-central.log"
 }
