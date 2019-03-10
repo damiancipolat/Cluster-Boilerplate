@@ -12,28 +12,84 @@ const {
 } = require('./dispatch.js');
 
 //Workers collection.
-let workers = [];
+let workers = new Map();
 
 //Dispatch message to the workers.
 const dispatchToWorker = (message)=>{
 
-  //Using the dispatcher algorithm, get the dispatch function.
-  const dispatcher = (config.get('service.dispatch')==='round-robin') ? roundRobin : random;
+  try{
 
-  //Get the workers using the dispatcher.
-  const worker = dispatcher(workers);
+    //Using the dispatcher algorithm, get the dispatch function.
+    const dispatcher = (config.get('service.dispatch')==='round-robin') ? roundRobin : random;
 
-  //Send message to the worker.
-  worker.send(message);
+    //Transform the map to array.
+    const workerList = Array.from(workers).map(e => e[1]);
 
-  logger.info('DISPATCH TO', { "PID": worker.process.pid});
+    //Get the workers using the dispatcher.
+    const worker = dispatcher(workerList);
+
+    //Send message to the worker.
+    worker.send(message);
+
+    logger.info('DISPATCH TO', { "PID": worker.process.pid});
+
+  } catch(error){
+    logger.error('Error in dispatch',error);
+  }
 
 }
 
 //Get response from the worker.
-const onResponseFromWorker = (message)=>{
+const onAnswer = (message)=>{
 
   logger.info('Received from worker',{msg:message});
+
+}
+
+//On cluster die.
+const onDeath = (deadWorker, code, signal)=>{
+
+  //Get pid from the old process.
+  const {pid} = deadWorker.process;
+
+  //Delete the process from the map.
+  const result = workers.get(pid);
+
+  //If the worker exists, remove and create it again.
+  if (result){
+
+    //Delete in the map.
+    workers.delete(pid);
+
+    //Create the new worker.
+    const worker = buildWorker();
+
+    //Register worker.
+    registerWorker(worker);
+
+    logger.info('Worker death detected, restarted OK', { "old": pid, "new":worker.process.pid});
+
+  }
+
+}
+
+//Register the worker.
+const registerWorker = (worker)=>{
+
+  const {pid} = worker.process;
+
+  //Find if the process exists in the collection.
+  const result = workers.get(pid);
+
+  //If the worker exists, remove and create it again.
+  if (result)
+    workers.delete(pid);
+
+  //Set the worker in the map.
+  workers.set(pid,worker);
+
+  //Show worker pid.
+  logger.info('Worker registered', { "PID": worker.process.pid});
 
 }
 
@@ -43,30 +99,13 @@ const buildWorker = ()=>{
   //Create fork.
   const worker = cluster.fork();
 
-  //Register worker.
-  workers.push(worker);
-
   //When receive response from one worker.
-  worker.on('message',onResponseFromWorker);
+  worker.on('message',onAnswer);
 
   //When the worker die.
-  worker.on('exit', onDie);
+  cluster.on('exit', onDeath);  
 
-}
-
-//On cluster die.
-const onDie = (worker)=>{
-
-  //Detect the process exit code.
-  if (worker['process']['exitCode'] === 0)
-    logger.info('Worker died peacefully', {"PID": worker.process.pid});
-  else {
-
-    logger.info('Worker died peacefully', {"PID": worker.process.pid, "exitCode":worker['process']['exitCode']});
-
-    //Create the new worker.
-    buildWorker();    
-  }
+  return worker;
 
 }
 
@@ -78,9 +117,9 @@ const createWorkers = (workerNum)=>{
 
     //Create fork.
     const worker = buildWorker();
-
-    //Show worker pid.
-    logger.info('Worker registered', { "PID": worker.process.pid});
+    
+    //Register the worker in the collection.
+    registerWorker(worker);
 
   }
 
@@ -119,8 +158,8 @@ const start = (workerNum,collector)=>{
 
     //Timeout to the childrens.
     setInterval(()=>{
-      dispatchToWorker({code:'test',msg:'test hola'});
-    },200);
+      //dispatchToWorker({code:'test',msg:'test hola'});
+    },2000);
 
   } catch(err){
     logger.error('Error creating workers', err);
