@@ -31,9 +31,42 @@ const dispatchToWorker = (message)=>{
 }
 
 //Get response from the worker.
-const responseFromWorker = (message)=>{
+const onResponseFromWorker = (message)=>{
 
   logger.info('Received from worker',{msg:message});
+
+}
+
+//Build worker.
+const buildWorker = ()=>{
+
+  //Create fork.
+  const worker = cluster.fork();
+
+  //Register worker.
+  workers.push(worker);
+
+  //When receive response from one worker.
+  worker.on('message',onResponseFromWorker);
+
+  //When the worker die.
+  worker.on('exit', onDie);
+
+}
+
+//On cluster die.
+const onDie = (worker)=>{
+
+  //Detect the process exit code.
+  if (worker['process']['exitCode'] === 0)
+    logger.info('Worker died peacefully', {"PID": worker.process.pid});
+  else {
+
+    logger.info('Worker died peacefully', {"PID": worker.process.pid, "exitCode":worker['process']['exitCode']});
+
+    //Create the new worker.
+    buildWorker();    
+  }
 
 }
 
@@ -44,16 +77,10 @@ const createWorkers = (workerNum)=>{
   for (let i=1;i<=workerNum;i++){
 
     //Create fork.
-    const worker = cluster.fork();
-
-    //Register worker.
-    workers.push(worker);
+    const worker = buildWorker();
 
     //Show worker pid.
     logger.info('Worker registered', { "PID": worker.process.pid});
-
-    //When receive response from one worker.
-    worker.on('message',responseFromWorker);
 
   }
 
