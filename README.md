@@ -4,6 +4,7 @@ This template was made thinking in a production environemnt, is a master / worke
 **Diagram:**
 
 The project architecture is the next..
+
 ![N|Solid](https://github.com/damiancipolat/Cluster-Boilerplate/blob/master/doc/diagram.png?raw=true)
 
 **Configuration:**
