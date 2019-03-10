@@ -22,3 +22,8 @@ Use the parameter -w or --workers to set the number of worker process to use.
 $ npm install
 $ node server.js --w 4
 ```
+
+**Modules:**
+- Winston, for logging.
+- Commander, to parse console parameters.
+- Config, to load confi json files.
